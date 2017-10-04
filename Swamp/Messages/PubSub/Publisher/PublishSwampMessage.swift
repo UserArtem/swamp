@@ -11,14 +11,14 @@ import Foundation
 /// [PUBLISH, requestId|number, options|dict, topic|String, args|list?, kwargs|dict?]
 class PublishSwampMessage: SwampMessage {
     
-    let requestId: Int
+    let requestId: UInt64
     let options: [String: Any]
     let topic: String
     
     let args: [Any]?
     let kwargs: [String: Any]?
     
-    init(requestId: Int, options: [String: Any], topic: String, args: [Any]?=nil, kwargs: [String: Any]?=nil) {
+    init(requestId: UInt64, options: [String: Any], topic: String, args: [Any]?=nil, kwargs: [String: Any]?=nil) {
         self.requestId = requestId
         self.options = options
         self.topic = topic
@@ -30,7 +30,7 @@ class PublishSwampMessage: SwampMessage {
     // MARK: SwampMessage protocol
     
     required init(payload: [Any]) {
-        self.requestId = payload[0] as! Int
+        self.requestId = payload[0] as! UInt64
         self.options = payload[1] as! [String: Any]
         self.topic = payload[2] as! String
         self.args = payload[safe: 3] as? [Any]

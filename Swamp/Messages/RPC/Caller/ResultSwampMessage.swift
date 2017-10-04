@@ -11,12 +11,12 @@ import Foundation
 /// [RESULT, requestId|number, details|dict, args|array?, kwargs|dict?]
 class ResultSwampMessage: SwampMessage {
     
-    let requestId: Int
+    let requestId: UInt64
     let details: [String: AnyObject]
     let results: [AnyObject]?
     let kwResults: [String: AnyObject]?
     
-    init(requestId: Int, details: [String: AnyObject], results: [AnyObject]?=nil, kwResults: [String: AnyObject]?=nil) {
+    init(requestId: UInt64, details: [String: AnyObject], results: [AnyObject]?=nil, kwResults: [String: AnyObject]?=nil) {
         self.requestId = requestId
         self.details = details
         self.results = results
@@ -26,7 +26,7 @@ class ResultSwampMessage: SwampMessage {
     /// MARK: SwampMessage protocol
     
     required init(payload: [Any]) {
-        self.requestId = payload[0] as! Int
+        self.requestId = payload[0] as! UInt64
         self.details = payload[1] as! [String: AnyObject]
         self.results  = payload[safe: 2] as? [AnyObject]
         self.kwResults = payload[safe: 3] as? [String: AnyObject]

@@ -11,13 +11,13 @@ import Foundation
 // [YIELD, requestId|number, options|dict, args|array?, kwargs|dict?]
 class YieldSwampMessage: SwampMessage {
     
-    let requestId: Int
+    let requestId: UInt64
     let options: [String: AnyObject]
     
     let args: [AnyObject]?
     let kwargs: [String: AnyObject]?
     
-    init(requestId: Int, options: [String: AnyObject], args: [AnyObject]?=nil, kwargs: [String: AnyObject]?=nil) {
+    init(requestId: UInt64, options: [String: AnyObject], args: [AnyObject]?=nil, kwargs: [String: AnyObject]?=nil) {
         self.requestId = requestId
         self.options = options
         
@@ -28,7 +28,7 @@ class YieldSwampMessage: SwampMessage {
     // MARK: SwampMessage protocol
     
     required init(payload: [Any]) {
-        self.requestId = payload[0] as! Int
+        self.requestId = payload[0] as! UInt64
         self.options = payload[1] as! [String: AnyObject]
         self.args = payload[safe: 2] as? [AnyObject]
         self.kwargs = payload[safe: 3] as? [String: AnyObject]

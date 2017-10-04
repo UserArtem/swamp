@@ -23,6 +23,11 @@ open class WebSocketSwampTransport: SwampTransport, WebSocketDelegate {
     
     public init(wsEndpoint: URL){
         self.socket = WebSocket(url: wsEndpoint, protocols: ["wamp.2.json"])
+        
+        if let token = UserDefaults.standard.object(forKey: "ai.gram.mai.kAccessTokenKey") as? String {
+            self.socket.headers = ["Authorization" : "Bearer \(token)"]
+        }
+        
         self.mode = .text
         socket.delegate = self
     }

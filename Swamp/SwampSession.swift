@@ -28,11 +28,11 @@ public typealias ErrorPublishCallback = (_ details: [String: Any], _ error: Stri
 // TODO: Expose only an interface (like Cancellable) to user
 open class Subscription {
     fileprivate let session: SwampSession
-    internal let subscription: Int
+    internal let subscription: UInt64
     internal let eventCallback: EventCallback
     fileprivate var isActive: Bool = true
 
-    internal init(session: SwampSession, subscription: Int, onEvent: @escaping EventCallback) {
+    internal init(session: SwampSession, subscription: UInt64, onEvent: @escaping EventCallback) {
         self.session = session
         self.subscription = subscription
         self.eventCallback = onEvent
@@ -57,7 +57,7 @@ open class Subscription {
 
 public protocol SwampSessionDelegate {
     func swampSessionHandleChallenge(_ authMethod: String, extra: [String: Any]) -> String
-    func swampSessionConnected(_ session: SwampSession, sessionId: Int)
+    func swampSessionConnected(_ session: SwampSession, sessionId: UInt64)
     func swampSessionEnded(_ reason: String)
 }
 
@@ -74,35 +74,35 @@ open class SwampSession: SwampTransportDelegate {
 
     // MARK: Members
     fileprivate let realm: String
-    fileprivate let transport: SwampTransport
+    fileprivate var transport: SwampTransport
     fileprivate let authmethods: [String]?
     fileprivate let authid: String?
     fileprivate let authrole: String?
     fileprivate let authextra: [String: Any]?
 
     // MARK: State members
-    fileprivate var currRequestId: Int = 1
+    fileprivate var currRequestId: UInt64 = 1
 
     // MARK: Session state
-    fileprivate var serializer: SwampSerializer?
-    fileprivate var sessionId: Int?
+    var serializer: SwampSerializer?
+    fileprivate var sessionId: UInt64?
     fileprivate var routerSupportedRoles: [SwampRole]?
 
     // MARK: Call role
     //                         requestId
-    fileprivate var callRequests: [Int: (callback: CallCallback, errorCallback: ErrorCallCallback)] = [:]
+    fileprivate var callRequests: [UInt64: (callback: CallCallback, errorCallback: ErrorCallCallback)] = [:]
 
     // MARK: Subscriber role
     //                              requestId
-    fileprivate var subscribeRequests: [Int: (callback: SubscribeCallback, errorCallback: ErrorSubscribeCallback, eventCallback: EventCallback)] = [:]
+    fileprivate var subscribeRequests: [UInt64: (callback: SubscribeCallback, errorCallback: ErrorSubscribeCallback, eventCallback: EventCallback)] = [:]
     //                          subscription
-    fileprivate var subscriptions: [Int: Subscription] = [:]
+    fileprivate var subscriptions: [UInt64: Subscription] = [:]
     //                                requestId
-    fileprivate var unsubscribeRequests: [Int: (subscription: Int, callback: UnsubscribeCallback, errorCallback: ErrorUnsubscribeCallback)] = [:]
+    fileprivate var unsubscribeRequests: [UInt64: (subscription: UInt64, callback: UnsubscribeCallback, errorCallback: ErrorUnsubscribeCallback)] = [:]
 
     // MARK: Publisher role
     //                            requestId
-    fileprivate var publishRequests: [Int: (callback: PublishCallback, errorCallback: ErrorPublishCallback)] = [:]
+    fileprivate var publishRequests: [UInt64: (callback: PublishCallback, errorCallback: ErrorPublishCallback)] = [:]
 
     // MARK: C'tor
     required public init(realm: String, transport: SwampTransport, authmethods: [String]?=nil, authid: String?=nil, authrole: String?=nil, authextra: [String: Any]?=nil){
@@ -155,7 +155,7 @@ open class SwampSession: SwampTransportDelegate {
     }
 
     // Internal because only a Subscription object can call this
-    internal func unsubscribe(_ subscription: Int, onSuccess: @escaping UnsubscribeCallback, onError: @escaping ErrorUnsubscribeCallback) {
+    internal func unsubscribe(_ subscription: UInt64, onSuccess: @escaping UnsubscribeCallback, onError: @escaping ErrorUnsubscribeCallback) {
         let unsubscribeRequestId = self.generateRequestId()
         // Tell router to unsubscribe me from some subscription
         self.sendMessage(UnsubscribeSwampMessage(requestId: unsubscribeRequestId, subscription: subscription))
@@ -354,11 +354,14 @@ open class SwampSession: SwampTransportDelegate {
 
     fileprivate func sendMessage(_ message: SwampMessage){
         let marshalledMessage = message.marshal()
-        let data = self.serializer!.pack(marshalledMessage as [Any])!
+        
+        guard let wsSerializer = self.serializer else { return }
+        
+        let data = wsSerializer.pack(marshalledMessage as [Any])!
         self.transport.sendData(data)
     }
 
-    fileprivate func generateRequestId() -> Int {
+    fileprivate func generateRequestId() -> UInt64 {
         self.currRequestId += 1
         return self.currRequestId
     }

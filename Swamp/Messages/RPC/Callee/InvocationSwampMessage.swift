@@ -11,14 +11,14 @@ import Foundation
 // [INVOCATION, requestId|number, registration|number, details|dict, args|array?, kwargs|dict?]
 class InvocationSwampMessage: SwampMessage {
     
-    let requestId: Int
-    let registration: Int
+    let requestId: UInt64
+    let registration: UInt64
     let details: [String: AnyObject]
     
     let args: [AnyObject]?
     let kwargs: [String: AnyObject]?
     
-    init(requestId: Int, registration: Int, details: [String: AnyObject], args: [AnyObject]?=nil, kwargs: [String: AnyObject]?=nil) {
+    init(requestId: UInt64, registration: UInt64, details: [String: AnyObject], args: [AnyObject]?=nil, kwargs: [String: AnyObject]?=nil) {
         self.requestId = requestId
         self.registration = registration
         self.details = details
@@ -30,8 +30,8 @@ class InvocationSwampMessage: SwampMessage {
     // MARK: SwampMessage protocol
     
     required init(payload: [Any]) {
-        self.requestId = payload[0] as! Int
-        self.registration = payload[1] as! Int
+        self.requestId = payload[0] as! UInt64
+        self.registration = payload[1] as! UInt64
         self.details = payload[2] as! [String: AnyObject]
         self.args = payload[safe: 3] as? [AnyObject]
         self.kwargs = payload[safe: 4] as? [String: AnyObject]

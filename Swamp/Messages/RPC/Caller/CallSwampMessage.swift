@@ -11,13 +11,13 @@ import Foundation
 /// [CALL, requestId|number, options|dict, proc|string, args|array?, kwargs|dict?]
 class CallSwampMessage: SwampMessage {
     
-    let requestId: Int
+    let requestId: UInt64
     let options: [String: Any]
     let proc: String
     let args: [Any]?
     let kwargs: [String: Any]?
     
-    init(requestId: Int, options: [String: Any], proc: String, args: [Any]?=nil, kwargs: [String: Any]?=nil) {
+    init(requestId: UInt64, options: [String: Any], proc: String, args: [Any]?=nil, kwargs: [String: Any]?=nil) {
         self.requestId = requestId
         self.options = options
         self.proc = proc
@@ -28,7 +28,7 @@ class CallSwampMessage: SwampMessage {
     /// MARK: SwampMessage protocol
     
     required init(payload: [Any]) {
-        self.requestId = payload[0] as! Int
+        self.requestId = payload[0] as! UInt64
         self.options = payload[1] as! [String: Any]
         self.proc = payload[2] as! String
         self.args = payload[safe: 3] as? [AnyObject]
